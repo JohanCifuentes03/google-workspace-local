@@ -8,10 +8,27 @@ import { createDriveTools } from './tools/drive';
 import { createCalendarTools } from './tools/calendar';
 
 const app = express();
-app.use(cors());
+
+// Configure CORS to allow requests from any origin
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-requested-with'],
+  credentials: true
+}));
+
 app.use(express.json());
 
 const sessionManager = new SessionManager();
+
+// Health check endpoint for Render.com
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'healthy', 
+    timestamp: new Date().toISOString(),
+    service: 'google-workspace-mcp-backend'
+  });
+});
 
 // In-memory cache of MCP servers per user (for performance)
 const userMcpServers = new Map<string, any>();
@@ -252,12 +269,12 @@ setInterval(async () => {
   await sessionManager.cleanupExpiredSessions();
 }, 60 * 60 * 1000); // Every hour
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Multi-tenant HTTP Server running on http://localhost:${PORT}`);
+const PORT = parseInt(process.env.PORT || '3000', 10);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Multi-tenant HTTP Server running on port ${PORT}`);
   console.log(`🌐 Public URL: ${process.env.PUBLIC_URL || 'http://localhost:' + PORT}`);
-  console.log(`👥 Multi-tenant MCP URLs: {PUBLIC_URL}/mcp/{userId}`);
-  console.log(`💡 To expose publicly: run 'ngrok http ${PORT}' in another terminal`);
+  console.log(`👥 Multi-tenant MCP URLs: {PUBLIC_URL}/mcp?userId={userId}`);
+  console.log(`💡 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
 // Graceful shutdown

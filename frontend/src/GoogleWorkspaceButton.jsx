@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { Cloud, CheckCircle, XCircle, Copy } from 'lucide-react';
 import './GoogleWorkspaceButton.css';
 
+// Get API URL from environment variable or use default for development
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 const GoogleWorkspaceButton = () => {
   const [status, setStatus] = useState('disconnected'); // disconnected, connecting, connected
   const [mcpUrl, setMcpUrl] = useState('');
@@ -20,7 +23,7 @@ const GoogleWorkspaceButton = () => {
     if (!userId) return;
 
     try {
-      const response = await fetch(`/api/status/${userId}`);
+      const response = await fetch(`${API_URL}/status/${userId}`);
       const data = await response.json();
       if (data.connected) {
         setStatus('connected');
@@ -48,7 +51,7 @@ const GoogleWorkspaceButton = () => {
 
     try {
       // Create a new session first
-      const sessionResponse = await fetch('/api/session/new');
+      const sessionResponse = await fetch(`${API_URL}/session/new`);
       const sessionData = await sessionResponse.json();
 
       setUserId(sessionData.userId);
@@ -88,7 +91,7 @@ const GoogleWorkspaceButton = () => {
     if (!userId) return;
 
     try {
-      await fetch(`/api/disconnect/${userId}`, { method: 'POST' });
+      await fetch(`${API_URL}/disconnect/${userId}`, { method: 'POST' });
       setStatus('disconnected');
       setMcpUrl('');
       setUserId('');
