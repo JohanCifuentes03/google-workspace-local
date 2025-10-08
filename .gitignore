@@ -226,6 +226,11 @@ cython_debug/
 # Google Cloud credentials (if using service accounts)
 *.json
 !client_secret_*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!jsconfig.json
+!vite.config.json
 
 # Backup files
 *.bak
