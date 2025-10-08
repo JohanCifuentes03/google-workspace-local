@@ -20,8 +20,8 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - REDIS_URL=redis://redis:6379
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-590584387416-3r0oa262lddt8bmjlbnk54456gnq7rgg.apps.googleusercontent.com}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-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}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - PUBLIC_URL=${PUBLIC_URL:-http://localhost:3000}
       - CORS_ORIGIN=*
     depends_on:
