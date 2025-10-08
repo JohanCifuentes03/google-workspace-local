@@ -1,0 +1,69 @@
+version: "3.8"
+
+# Docker Compose para desarrollo con hot-reload
+# Uso: docker-compose -f docker-compose.dev.yml up
+
+networks:
+  mcp-network:
+    driver: bridge
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: mcp-redis-dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
+    networks:
+      - mcp-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: mcp-backend-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    env_file:
+      - ./backend/.env
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=development
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - mcp-network
+    command: npm run dev
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: mcp-frontend-dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    depends_on:
+      - backend
+    networks:
+      - mcp-network
+    command: npm run dev -- --host 0.0.0.0
+
+volumes:
+  redis_data:
