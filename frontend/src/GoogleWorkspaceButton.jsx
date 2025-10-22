@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Cloud, CheckCircle, XCircle, Copy } from 'lucide-react';
+import { Copy, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import './GoogleWorkspaceButton.css';
 
 // Get API URL from environment variable or use default for development
@@ -10,6 +10,7 @@ const GoogleWorkspaceButton = () => {
   const [mcpUrl, setMcpUrl] = useState('');
   const [error, setError] = useState('');
   const [userId, setUserId] = useState('');
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (userId) {
@@ -150,54 +151,94 @@ const GoogleWorkspaceButton = () => {
 
   const copyUrl = () => {
     navigator.clipboard.writeText(mcpUrl);
-    // Could add a toast notification here
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="workspace-button-container">
-      {status === 'disconnected' && (
-        <button
-          className="connect-button"
-          onClick={handleConnect}
-          disabled={status === 'connecting'}
-        >
-          <Cloud size={20} />
-          Crear Sesión y Conectar
-        </button>
-      )}
-
-      {status === 'connecting' && (
-        <div className="status-message connecting">
-          <div className="spinner"></div>
-          Conectando...
+    <div className="connector-card">
+      {/* Header */}
+      <div className="connector-header">
+        <svg className="connector-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z" fill="#EA4335"/>
+        </svg>
+        <div className="connector-info">
+          <h3 className="connector-title">Google Workspace MCP</h3>
+          <p className="connector-description">Gmail, Drive & Calendar Tools</p>
         </div>
-      )}
+      </div>
 
-      {status === 'connected' && (
-        <div className="connected-container">
-          <div className="status-message connected">
-            <CheckCircle size={20} color="green" />
+      {/* Status Badge */}
+      <div className="connector-status">
+        {status === 'disconnected' && (
+          <span className="status-badge status-disconnected">
+            <span className="status-dot"></span>
+            Desconectado
+          </span>
+        )}
+        {status === 'connecting' && (
+          <span className="status-badge status-connecting">
+            <Loader2 className="status-spinner" size={12} />
+            Conectando...
+          </span>
+        )}
+        {status === 'connected' && (
+          <span className="status-badge status-connected">
+            <CheckCircle2 size={12} />
             Conectado
-          </div>
-          <div className="url-container">
-            <span className="url-label">URL MCP:</span>
-            <code className="mcp-url">{mcpUrl}</code>
-            <button className="copy-button" onClick={copyUrl} title="Copiar URL">
-              <Copy size={16} />
-            </button>
-          </div>
-          <button className="disconnect-button" onClick={handleDisconnect}>
-            <XCircle size={16} />
-            Desconectar
-          </button>
-        </div>
-      )}
+          </span>
+        )}
+      </div>
 
-      {error && (
-        <div className="error-message">
-          {error}
-        </div>
-      )}
+      {/* Connection Section */}
+      <div className="connector-body">
+        {status === 'disconnected' && (
+          <button
+            className="btn-primary"
+            onClick={handleConnect}
+            disabled={status === 'connecting'}
+          >
+            Crear conexión
+          </button>
+        )}
+
+        {status === 'connected' && (
+          <>
+            <div className="connection-details">
+              <label className="detail-label">URL del conector</label>
+              <div className="url-input-group">
+                <input
+                  type="text"
+                  className="url-input"
+                  value={mcpUrl}
+                  readOnly
+                />
+                <button
+                  className="btn-icon"
+                  onClick={copyUrl}
+                  title={copied ? '¡Copiado!' : 'Copiar URL'}
+                >
+                  {copied ? <CheckCircle2 size={16} /> : <Copy size={16} />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              className="btn-secondary"
+              onClick={handleDisconnect}
+            >
+              Cerrar conexión
+            </button>
+          </>
+        )}
+
+        {error && (
+          <div className="error-alert">
+            <AlertCircle size={16} />
+            <span>{error}</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

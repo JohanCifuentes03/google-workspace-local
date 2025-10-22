@@ -65,8 +65,23 @@ export class SessionService implements ISessionService {
     }
   }
 
+  async saveUserEmail(userId: string, email: string): Promise<void> {
+    await this.redis.setEx(`email:${userId}`, 86400, email);
+    console.log(`📧 Saved email for user: ${userId}`);
+  }
+
+  async getUserEmail(userId: string): Promise<string | null> {
+    try {
+      return await this.redis.get(`email:${userId}`);
+    } catch (error) {
+      console.error('Error getting user email:', error);
+      return null;
+    }
+  }
+
   async disconnectUser(userId: string): Promise<void> {
     await this.redis.del(`tokens:${userId}`);
+    await this.redis.del(`email:${userId}`);
     await this.updateSessionStatus(userId, false);
     console.log(`🔌 Disconnected user: ${userId}`);
   }
