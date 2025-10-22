@@ -20,4 +20,4 @@ RUN npm prune --production
 
 EXPOSE 3000
 
-CMD ["node", "dist/http-server.js"]
+CMD ["node", "dist/src/index.js"]

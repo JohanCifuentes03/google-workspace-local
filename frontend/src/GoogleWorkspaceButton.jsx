@@ -23,8 +23,25 @@ const GoogleWorkspaceButton = () => {
     if (!userId) return;
 
     try {
-      const response = await fetch(`${API_URL}/status/${userId}`);
-      const data = await response.json();
+      const response = await fetch(`${API_URL}/status/${userId}?ngrok-skip-browser-warning=true`, {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
+      });
+      const responseText = await response.text();
+      if (!response.ok) {
+        throw new Error(`Status request failed: ${response.status} ${response.statusText} -> ${responseText}`);
+      }
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Failed to parse status response:', responseText);
+        throw parseError;
+      }
       if (data.connected) {
         setStatus('connected');
         setMcpUrl(data.mcpUrl);
@@ -51,8 +68,26 @@ const GoogleWorkspaceButton = () => {
 
     try {
       // Create a new session first
-      const sessionResponse = await fetch(`${API_URL}/session/new`);
-      const sessionData = await sessionResponse.json();
+      const sessionResponse = await fetch(`${API_URL}/session/new?ngrok-skip-browser-warning=true`, {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
+      });
+
+      const sessionText = await sessionResponse.text();
+      if (!sessionResponse.ok) {
+        throw new Error(`Session request failed: ${sessionResponse.status} ${sessionResponse.statusText} -> ${sessionText}`);
+      }
+
+      let sessionData;
+      try {
+        sessionData = JSON.parse(sessionText);
+      } catch (parseError) {
+        console.error('Failed to parse session response:', sessionText);
+        throw parseError;
+      }
 
       setUserId(sessionData.userId);
 
@@ -91,7 +126,18 @@ const GoogleWorkspaceButton = () => {
     if (!userId) return;
 
     try {
-      await fetch(`${API_URL}/disconnect/${userId}`, { method: 'POST' });
+      const disconnectResponse = await fetch(`${API_URL}/disconnect/${userId}?ngrok-skip-browser-warning=true`, { 
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
+      });
+
+      if (!disconnectResponse.ok) {
+        const disconnectText = await disconnectResponse.text();
+        throw new Error(`Disconnect failed: ${disconnectResponse.status} ${disconnectResponse.statusText} -> ${disconnectText}`);
+      }
       setStatus('disconnected');
       setMcpUrl('');
       setUserId('');

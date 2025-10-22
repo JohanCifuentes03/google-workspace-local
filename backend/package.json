@@ -5,8 +5,11 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/http-server.js",
-    "dev": "ts-node --files http-server.ts"
+    "start": "node dist/src/index.js",
+    "dev": "ts-node --files src/index.ts",
+    "dev:http": "ts-node --files src/app.ts",
+    "dev:mcp": "ts-node --files src/server.ts",
+    "clean": "rm -rf dist"
   },
   "keywords": [],
   "author": "",
@@ -17,7 +20,8 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "googleapis": "^161.0.0",
-    "redis": "^5.8.3"
+    "redis": "^5.8.3",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
